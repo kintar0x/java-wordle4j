@@ -4,9 +4,12 @@ import java.util.*;
 
 public class WordleGame {
 
+    public static final int WORD_LENGTH = 5;
+    public static final int MAX_ATTEMPTS = 6;
+
     private final WordleDictionary dictionary;
     private final String answer;
-    private int steps = 6;
+    private int steps = MAX_ATTEMPTS;
     private final Set<Character> usedWrongLetters;
     private final Set<Character> requiredLetters;
     private final Map<Integer, Character> exactPositions;
@@ -36,23 +39,36 @@ public class WordleGame {
         return history;
     }
 
+    public static String normalize(String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.trim().toLowerCase().replace('ё', 'е');
+    }
+
     public String makeMove(String guess) {
-        if (guess == null || guess.length() != 5) {
-            return null;
+        String normalized = normalize(guess);
+
+        if (normalized == null || normalized.length() != WORD_LENGTH) {
+            throw new InvalidWordException(
+                    String.format("Слово должно быть из %d букв", WORD_LENGTH)
+            );
         }
 
-        if (!dictionary.isValidWord(guess)) {
-            return null;
+        if (!dictionary.isValidWord(normalized)) {
+            throw new WordNotInDictionaryException("Слова нет в словаре");
         }
 
-        if (history.contains(guess)) {
-            return null;
+        if (history.contains(normalized)) {
+            throw new WordNotInDictionaryException(
+                    String.format("Вы уже вводили слово: %s", normalized)
+            );
         }
 
-        String result = dictionary.compareWords(guess, answer);
+        String result = dictionary.compareWords(normalized, answer);
 
-        for (int i = 0; i < guess.length(); i++) {
-            char c = guess.charAt(i);
+        for (int i = 0; i < normalized.length(); i++) {
+            char c = normalized.charAt(i);
             char res = result.charAt(i);
 
             if (res == '+') {
@@ -64,7 +80,7 @@ public class WordleGame {
             }
         }
 
-        history.add(guess);
+        history.add(normalized);
         steps--;
 
         return result;

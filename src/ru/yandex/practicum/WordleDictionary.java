@@ -28,11 +28,11 @@ public class WordleDictionary {
         if (word == null) {
             return false;
         }
-        String line = word.trim().toLowerCase();
-        if (line.length() != 5) {
+        String normalized = WordleGame.normalize(word);
+        if (normalized.length() != WordleGame.WORD_LENGTH) {
             return false;
         }
-        return wordSet.contains(line);
+        return wordSet.contains(normalized);
     }
 
     public String getHint(Set<Character> usedWrongLetters,

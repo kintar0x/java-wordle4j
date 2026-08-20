@@ -19,22 +19,23 @@ public class Wordle {
 
             WordleGame game = new WordleGame(dictionary);
             writer.println("Игра создана");
-            writer.println("Ответ: " + game.getAnswer());
+            writer.printf("Ответ: %s%n", game.getAnswer());
 
-            System.out.println("Угадайте слово из 5 букв! У вас 6 попыток.");
+            System.out.printf("Угадайте слово из %d букв! У вас %d попыток.%n",
+                    WordleGame.WORD_LENGTH, WordleGame.MAX_ATTEMPTS);
             System.out.println("Введите слово или нажмите Enter для подсказки.");
 
             while (game.getSteps() > 0) {
-                System.out.println("Осталось ходов: " + game.getSteps());
+                System.out.printf("Осталось ходов: %d%n", game.getSteps());
                 System.out.print(">> ");
                 String input = scanner.nextLine();
 
-                if (input.isEmpty()) {
+                if (input.isBlank()) {
                     String hint = game.getHint();
                     String result = game.makeMove(hint);
-                    System.out.println("Подсказка: " + hint);
-                    System.out.println("Результат: " + result);
-                    writer.println("Подсказка: " + hint + " -> " + result);
+                    System.out.printf("Подсказка: %s%n", hint);
+                    System.out.printf("Результат: %s%n", result);
+                    writer.printf("Подсказка: %s -> %s%n", hint, result);
 
                     if (result == null) {
                         continue;
@@ -48,39 +49,46 @@ public class Wordle {
                     continue;
                 }
 
-                String result = game.makeMove(input);
-                writer.println("Игрок: " + input + " -> " + result);
+                try {
+                    String normalizedInput = WordleGame.normalize(input);
+                    String result = game.makeMove(normalizedInput);
+                    writer.printf("Игрок: %s -> %s%n", normalizedInput, result);
 
-                if (result == null) {
-                    System.out.println("Ошибка ввода");
-                    writer.println("Ошибка: " + input);
-                    continue;
+                    if (result == null) {
+                        System.out.println("❌ Ошибка ввода");
+                        writer.printf("Ошибка: %s%n", normalizedInput);
+                        continue;
+                    }
+
+                    if (normalizedInput.equals(game.getAnswer())) {
+                        System.out.println("🎉 Победа!");
+                        writer.println("Игра завершена: ПОБЕДА");
+                        break;
+                    }
+
+                    if (game.getSteps() == 0) {
+                        System.out.printf("Поражение. Загадано слово: %s%n", game.getAnswer().toUpperCase());
+                        writer.printf("Игра завершена: ПОРАЖЕНИЕ. Ответ: %s%n", game.getAnswer());
+                        break;
+                    }
+
+                    System.out.printf("Результат: %s%n", result);
+
+                } catch (InvalidWordException | WordNotInDictionaryException e) {
+                    System.out.printf("❌ %s%n", e.getMessage());
+                    writer.printf("Ошибка: %s%n", e.getMessage());
                 }
-
-                if (input.equals(game.getAnswer())) {
-                    System.out.println("Победа!");
-                    writer.println("Игра завершена: ПОБЕДА");
-                    break;
-                }
-
-                if (game.getSteps() == 0) {
-                    System.out.println("Поражение. Загадано слово: " + game.getAnswer().toUpperCase());
-                    writer.println("Игра завершена: ПОРАЖЕНИЕ. Ответ: " + game.getAnswer());
-                    break;
-                }
-
-                System.out.println("Результат: " + result);
             }
 
             System.out.println("Игра окончена. Спасибо за игру!");
             writer.println("Программа завершила работу");
 
         } catch (DictionaryLoadException e) {
-            System.out.println("Ошибка загрузки словаря: " + e.getMessage());
+            System.out.printf("Ошибка загрузки словаря: %s%n", e.getMessage());
         } catch (IOException e) {
-            System.out.println("Ошибка работы с файлом лога: " + e.getMessage());
+            System.out.printf("Ошибка работы с файлом лога: %s%n", e.getMessage());
         } catch (Exception e) {
-            System.out.println("Непредвиденная ошибка: " + e.getMessage());
+            System.out.printf("Непредвиденная ошибка: %s%n", e.getMessage());
         }
     }
 }

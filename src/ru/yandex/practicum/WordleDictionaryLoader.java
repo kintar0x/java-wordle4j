@@ -18,17 +18,21 @@ public class WordleDictionaryLoader {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename, StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                String word = line.trim().toLowerCase().replace("ё", "е");
-                if (word.length() == 5) {
+                String word = WordleGame.normalize(line);
+                if (word.length() == WordleGame.WORD_LENGTH) {
                     words.add(word);
                 }
             }
         } catch (IOException e) {
-            throw new DictionaryLoadException("Ошибка чтения файла: " + filename, e);
+            throw new DictionaryLoadException(
+                    String.format("Ошибка чтения файла: %s", filename), e
+            );
         }
 
         if (words.isEmpty()) {
-            throw new DictionaryLoadException("Словарь пуст или не нашлось слов длиной в 5 символов");
+            throw new DictionaryLoadException(
+                    String.format("Словарь пуст или не нашлось слов длиной в %d символов", WordleGame.WORD_LENGTH)
+            );
         }
 
         return words;

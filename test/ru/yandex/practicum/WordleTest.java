@@ -43,14 +43,12 @@ class WordleGameTest {
 
     @Test
     void testMakeMoveInvalidLength() {
-        String result = game.makeMove("кот");
-        assertNull(result);
+        assertThrows(InvalidWordException.class, () -> game.makeMove("кот"));
     }
 
     @Test
     void testMakeMoveInvalidWord() {
-        String result = game.makeMove("абвгд");
-        assertNull(result);
+        assertThrows(WordNotInDictionaryException.class, () -> game.makeMove("абвгд"));
     }
 
     @Test
